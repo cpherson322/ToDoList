@@ -47,7 +47,7 @@ document.addEventListener("change", (event) => {
         }
     }
     if (event.target.type == "file") {
-        event.target.files[0].text().then(text=>{parseXMLIntoToDoList(text)})
+        event.target.files[0].text().then(text=>{parseJSONIntoToDoList(text)})
         event.target.remove()
     }
 })
@@ -67,25 +67,22 @@ document.addEventListener("input", (event) => {
 })
 
 function serializeToDoList() {
-    let toDoListDocument = document.implementation.createDocument(null, "ToDoList", null)
+    let toDolistArray = []
     Array.from(document.getElementById("container").children).forEach(child => {
-        let item = toDoListDocument.createElement("item")
-        if (child.children[0].checked) {
-            item.setAttribute("checked", "true")
-        }
-        item.textContent = child.children[1].innerText
         if (!child.children[1].innerText == '') {
-            toDoListDocument.documentElement.appendChild(item)
+            toDolistArray.push([{
+                checked: child.children[0].checked,
+                text: child.children[1].innerText
+            }])
         }
     })
-    let serializer = new XMLSerializer()
-    return serializer.serializeToString(toDoListDocument)
+    return JSON.stringify(toDolistArray)
 }
 
 function downloadLocal() {
     let downloadElement = document.createElement("a")
-    downloadElement.href = URL.createObjectURL(new Blob([serializeToDoList()], {type: "text/xml"}))
-    downloadElement.download = "ToDoList.xml"
+    downloadElement.href = URL.createObjectURL(new Blob([serializeToDoList()], {type: "text/json"}))
+    downloadElement.download = "ToDoList.json"
     document.body.appendChild(downloadElement)
     downloadElement.click()
     setTimeout(() => {
@@ -94,12 +91,10 @@ function downloadLocal() {
     }, 100)
 }
 
-function parseXMLIntoToDoList(XMLString) {
-    let parser = new DOMParser()
-    let toDoListDocument = parser.parseFromString(XMLString, "text/xml")
+function parseJSONIntoToDoList(JSONString) {
     document.getElementById("container").replaceChildren([])
-    Array.from(toDoListDocument.documentElement.children).forEach((child) => {
-        addItem(null, null, true, child.textContent, child.getAttribute("checked"))
+    JSON.parse(JSONString).forEach(item => {
+        addItem(null, null, true, item.text, item.checked)
     })
     addItem()
 }
@@ -107,7 +102,7 @@ function parseXMLIntoToDoList(XMLString) {
 function uploadLocal() {
     let fileGraber = document.createElement("input")
     fileGraber.type = "file"
-    fileGraber.accept = "text/xml"
+    fileGraber.accept = "text/json"
     fileGraber.style.display = "none"
     document.body.appendChild(fileGraber)
     fileGraber.click()
@@ -119,7 +114,7 @@ document.addEventListener('dragover', (event) => {
 
 document.addEventListener('drop', (event) => {
     event.preventDefault()
-    event.dataTransfer.files[0].text().then(text=>{parseXMLIntoToDoList(text)})
+    event.dataTransfer.files[0].text().then(text=>{parseJSONIntoToDoList(text)})
 })
 
 addItem()
