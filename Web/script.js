@@ -70,10 +70,10 @@ function serializeToDoList() {
     let toDolistArray = []
     Array.from(document.getElementById("container").children).forEach(child => {
         if (!child.children[1].innerText == '') {
-            toDolistArray.push([{
+            toDolistArray.push({
                 checked: child.children[0].checked,
                 text: child.children[1].innerText
-            }])
+            })
         }
     })
     return JSON.stringify(toDolistArray)
