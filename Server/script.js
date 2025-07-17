@@ -1,18 +1,25 @@
-const http = require('http')
+const express = require('express')
+const cookieParser = require('cookie-parser')
+const webapp = express()
+const port = 39640
 
-const api = http.createServer((req, res) => {
-    switch (req.url) {
-	    case '/':
-		    returnJson(res, 200, {})
-		    break
-	    default:
-            returnJson(res, 404, {error: 'Unknown request '+req.url})
-    }
-})
+webapp.use(cookieParser())
 
-function returnJson(res, statusCode, jsonData) {
-        res.writeHead(statusCode, {'Content-Type': 'application/json'})
-        res.end(JSON.stringify(jsonData))
+users = {
+        "abc123": {"List1": "ListData"}
 }
 
-api.listen(39640, 'localhost')
+webapp.get('/', (req, res) => {
+  let sessionID = "abc123"
+  res.cookie("sessionID", sessionID, {httpOnly: true})
+  res.send("Cookie sent!")
+
+  user = users[sessionID]
+  if (!user) {
+        res.status(401).json({error: "Invalid session"})
+  }
+})
+
+webapp.listen(port, () => {
+  console.log(`Listening on port ${port}`)
+})
