@@ -118,3 +118,19 @@ document.addEventListener('drop', (event) => {
 })
 
 addItem()
+
+function uploadServer() {
+    fetch('./api/save-list', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: serializeToDoList()
+    }).then(response => {response.json().then(json => {
+        console.log(json)
+    })})
+}
+
+function downloadServer() {
+    fetch('./api/get-list').then(response => {response.text().then(data => {
+        parseJSONIntoToDoList(data)
+    })})
+}
